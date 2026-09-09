@@ -2,7 +2,7 @@
 //masukkan library domPDF
 require_once 'vendor/autoload.php';
 use Dompdf\Dompdf;
-use Dompdf\option;
+use Dompdf\Options;
 
 //instansiasi objek dompdf
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
@@ -12,7 +12,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     $kelas        = htmlspecialchars($_POST['kelas']);
     $alasan       = htmlspecialchars($_POST['alasan']);
     $tgl_mulai    = date('d F Y', strtotime($_POST['tgl_mulai']));
-    $tgl_selesai  = date('d F Y', strtotime($_POST['tgl_mulai']));
+    $tgl_selesai  = date('d F Y', strtotime($_POST['tgl_selesai']));
     $keterangan   = htmlspecialchars($_POST['keterangan']);
     $tgl_sekarang = date('d F Y');
 
@@ -91,16 +91,38 @@ $html = '
                 <td><b>' . $nama . '</b></td>
             </tr>
             <tr>
-                <td>width="130">NIS</td>
+                <td width="130">NIS</td>
+                <td>:</td>
+                <td>' . $nis . '</td>
+            </tr>
+            <tr>
+                <td width="130">Kelas</td>
                 <td>:</td>
                 <td>' . $kelas . '</td>
             </tr>
-        <table>
+            </table>
 
         <p>Bermaksud untuk mengajukan izin meninggalkan kelas, pada tangga </b> ' . $tgl_mulai . '<b> sampai dengan </b> ' . $tgl_selesai . '</b> dikarenakan <b> . $alasan . </b> </p>
-        ' . (keterangan ? '<p>Detail keterangan : ' . $keterangan . '</p>' : '') . '
-   </body>
-   </html>
-';
+        ' . (isset($keterangan) ? '<p>Detail keterangan : ' . $keterangan . '</p>' : '') . '
+        <p>Demikian surat izin ini saya buat. Terimakasih atas perhatian Bapak/Ibu, saya ucapkan Terimakasih</p>
 
+        <div class="ttd-container">
+           <div class="ttd_box">
+               <p>Semarang, ' . $tgl_sekarang . ' <br>Hormat Saya,</p>
+               <p><b>' . $nama . '</b></p>
+   </body>
+     </html>
+     ';
+
+     $options = new Options();
+     $options->set('isRemoteEnabled', true);
+
+     $dompdf = new Dompdf($options);
+     $dompdf->loadHtml($html);
+     $dompdf->setPaper('A4', 'portrait');
+     $dompdf->render();
+
+     $dompdf->stream('surat_izin_' . str_replace(' ', '_', $nama) . ".pdf", ["Attachment" => false]);
+     
 }
+?>
